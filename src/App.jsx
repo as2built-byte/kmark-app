@@ -5,6 +5,7 @@ import Login from './pages/Login';
 import Timbratura from './pages/Timbratura';
 import Dipendenti from './pages/Dipendenti';
 import TimbratureAdmin from './pages/TimbratureAdmin';
+import AdminPresenze from './pages/AdminPresenze';
 import BustePaga from './pages/BustePaga';
 import Spese from './pages/Spese';
 import Presenze from './pages/Presenze';
@@ -39,6 +40,7 @@ function App() {
           <Route path="timbratura" element={<Timbratura />} />
           <Route path="dipendenti" element={<AdminRoute><Dipendenti /></AdminRoute>} />
           <Route path="timbrature-admin" element={<AdminRoute><TimbratureAdmin /></AdminRoute>} />
+          <Route path="presenze-admin" element={<AdminRoute><AdminPresenze /></AdminRoute>} />
           <Route path="buste-paga" element={<BustePaga />} />
           <Route path="spese" element={<Spese />} />
           <Route path="presenze" element={<Presenze />} />

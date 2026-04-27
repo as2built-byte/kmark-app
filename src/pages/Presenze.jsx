@@ -185,8 +185,12 @@ export default function Presenze() {
                         <div className="flex items-center gap-1.5 flex-wrap">
                           {abs.map((a, ai) => {
                             const t = getType(a.tipo);
+                            const stato = a.stato || 'in attesa';
+                            const statoDot = stato === 'approvata' ? '#22c55e' : stato === 'rifiutata' ? '#ef4444' : '#f59e0b';
+                            const statoTitle = stato === 'approvata' ? 'Approvata' : stato === 'rifiutata' ? 'Rifiutata' : 'In attesa';
                             return (
-                              <span key={ai} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white ${t.bg} shadow-sm`}>
+                              <span key={ai} className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white ${t.bg} shadow-sm`} title={statoTitle}>
+                                <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: statoDot }} />
                                 {a.ore || CONTRACT_H}h
                                 <span className="font-normal opacity-90 ml-0.5">{t.label}</span>
                               </span>

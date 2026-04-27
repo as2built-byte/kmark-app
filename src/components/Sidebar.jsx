@@ -9,6 +9,7 @@ import {
   Users,
   Wallet,
   ShieldCheck,
+  ClipboardCheck,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -19,7 +20,8 @@ export const navItems = [
   { to: '/spese',            icon: Receipt,      label: 'Spese'             },
   { to: '/presenze',         icon: CalendarDays, label: 'Presenze'          },
   { to: '/bacheca',          icon: Megaphone,    label: 'Bacheca'           },
-  { to: '/timbrature-admin', icon: ShieldCheck,  label: 'Admin Presenze', admin: true },
+  { to: '/timbrature-admin', icon: ShieldCheck,    label: 'Timbrature',      admin: true },
+  { to: '/presenze-admin',   icon: ClipboardCheck, label: 'Presenze',        admin: true },
 ];
 
 export default function Sidebar() {

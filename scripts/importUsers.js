@@ -23,6 +23,7 @@ const ADMIN_EMAILS = new Set(['a.matassa@kmark.it', 'a.atamna@kmark.it']);
 
 const USERS = [
   { displayName: 'Annalisa Matassa',        email: 'a.matassa@kmark.it'        },
+  { displayName: 'Amin Atamna',             email: 'a.atamna@kmark.it'         },
   { displayName: 'Emanuela Alesiani',        email: 'e.alesiani@kmark.it'       },
   { displayName: 'Martina Antonini',         email: 'm.antonini@kmark.it'       },
   { displayName: 'Piergiuseppe Belmonte',    email: 'p.belmonte@kmark.it'       },
