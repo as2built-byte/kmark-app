@@ -1,0 +1,141 @@
+﻿@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* ── Tailwind v4 theme tokens ─────────────────────────────────────────────── */
+@theme {
+  --color-kmark-red:           #c0392b;
+  --color-kmark-dark:          #0a0a0a;
+  --color-kmark-card:          #131313;
+  --color-kmark-gold:          #b8962e;
+  --color-kmark-gold-hover:    #a07a20;
+  --color-kmark-primary:       #27ae60;
+  --color-kmark-primary-hover: #219a52;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ── Base reset ───────────────────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+/* ── K-MARK Black & Gold — global theme variables ─────────────────────────── */
+:root {
+  /* Override Tailwind's slate palette → dark equivalents
+     (Tailwind v4 utilities reference these custom properties at runtime) */
+  --color-slate-50:  #0e0e0e;
+  --color-slate-100: #181818;
+  --color-slate-200: rgba(184, 150, 46, 0.18);
+  --color-slate-300: rgba(240, 236, 224, 0.22);
+  --color-slate-400: rgba(240, 236, 224, 0.36);
+  --color-slate-500: rgba(240, 236, 224, 0.52);
+  --color-slate-600: rgba(240, 236, 224, 0.66);
+  --color-slate-700: rgba(240, 236, 224, 0.80);
+  --color-slate-800: #f0ece0;
+  --color-slate-900: #f5f2e8;
+
+  /* K-MARK brand shorthand */
+  --kmark-gold:          #b8962e;
+  --kmark-gold-rgb:      184, 150, 46;
+  --kmark-card:          #131313;
+  --kmark-card-hover:    #1c1c1c;
+  --kmark-primary:       #27ae60;
+}
+
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background-color: #0a0a0a;
+  color: #f0ece0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Important headings in gold */
+h1 { color: #b8962e; }
+
+/* ── White backgrounds → dark card gradient ───────────────────────────────── */
+.bg-white {
+  background: linear-gradient(145deg, #131313 0%, #161616 100%) !important;
+}
+
+/* ── Card shadows with gold inner rim ────────────────────────────────────── */
+.shadow-sm {
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(184, 150, 46, 0.07) !important;
+}
+.shadow-lg {
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(184, 150, 46, 0.1) !important;
+}
+
+/* ── Hover states → subtle gold tint ─────────────────────────────────────── */
+.hover\:bg-slate-50:hover  { background-color: rgba(184, 150, 46, 0.04) !important; }
+.hover\:bg-slate-100:hover { background-color: rgba(184, 150, 46, 0.07) !important; }
+
+/* ── Dividers → gold-tinted ──────────────────────────────────────────────── */
+.divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.divide-slate-200 > :not([hidden]) ~ :not([hidden]) {
+  border-color: rgba(184, 150, 46, 0.1) !important;
+}
+
+/* ── Light color backgrounds → dark transparent ──────────────────────────── */
+.bg-emerald-50,  .bg-green-50   { background-color: rgba(39,  174, 96,  0.08) !important; }
+.bg-emerald-100, .bg-green-100  { background-color: rgba(39,  174, 96,  0.14) !important; }
+.bg-rose-50,     .bg-red-50     { background-color: rgba(192, 57,  43,  0.08) !important; }
+.bg-rose-100,    .bg-red-100    { background-color: rgba(192, 57,  43,  0.14) !important; }
+.bg-orange-50                   { background-color: rgba(234, 88,  12,  0.08) !important; }
+.bg-orange-100                  { background-color: rgba(234, 88,  12,  0.14) !important; }
+.bg-amber-50,    .bg-yellow-50  { background-color: rgba(245, 158, 11,  0.08) !important; }
+.bg-amber-100,   .bg-yellow-100 { background-color: rgba(245, 158, 11,  0.14) !important; }
+.bg-blue-50                     { background-color: rgba(59,  130, 246, 0.08) !important; }
+.bg-blue-100                    { background-color: rgba(59,  130, 246, 0.14) !important; }
+.bg-violet-50                   { background-color: rgba(139, 92,  246, 0.08) !important; }
+.bg-sky-50                      { background-color: rgba(14,  165, 233, 0.08) !important; }
+
+/* ── Light color borders → transparent ──────────────────────────────────── */
+.border-emerald-200, .border-green-200  { border-color: rgba(39,  174, 96,  0.28) !important; }
+.border-emerald-100, .border-green-100  { border-color: rgba(39,  174, 96,  0.16) !important; }
+.border-rose-200,    .border-red-200    { border-color: rgba(192, 57,  43,  0.28) !important; }
+.border-orange-200                      { border-color: rgba(234, 88,  12,  0.28) !important; }
+.border-amber-200                       { border-color: rgba(245, 158, 11,  0.28) !important; }
+
+/* ── Form inputs → dark styled ────────────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="search"],
+select,
+textarea {
+  background: #1a1a1a !important;
+  color: #f0ece0 !important;
+  border-color: rgba(184, 150, 46, 0.2) !important;
+}
+input::placeholder,
+textarea::placeholder {
+  color: rgba(240, 236, 224, 0.30) !important;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(184, 150, 46, 0.55) !important;
+  box-shadow: 0 0 0 3px rgba(184, 150, 46, 0.10) !important;
+  outline: none;
+}
+
+/* ── Legacy card class ─────────────────────────────────────────────────────── */
+.kmark-card {
+  background: linear-gradient(145deg, #131313 0%, #171717 100%);
+  border: 1px solid rgba(184, 150, 46, 0.2);
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(184, 150, 46, 0.07);
+}
+
+/* ── Custom gold scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar              { width: 5px; height: 5px; }
+::-webkit-scrollbar-track        { background: #0a0a0a; }
+::-webkit-scrollbar-thumb        { background: rgba(184, 150, 46, 0.28); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover  { background: rgba(184, 150, 46, 0.50); }
+
+#root { min-height: 100vh; }
