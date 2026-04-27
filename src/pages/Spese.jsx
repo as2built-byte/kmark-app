@@ -12,10 +12,10 @@ import { it } from 'date-fns/locale';
 const MESI_LABEL = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
 const CATEGORIES = ['Trasporto', 'Alloggio', 'Pasti', 'Carburante', 'Materiali', 'Altro'];
-const STATUS_COLORS = {
-  inviata: 'bg-blue-100 text-blue-700',
-  approvata: 'bg-green-100 text-green-700',
-  rifiutata: 'bg-red-100 text-red-700',
+const STATUS_STYLES = {
+  inviata:   { cls: 'bg-yellow-100 text-yellow-700', label: '⏳ In attesa' },
+  approvata: { cls: 'bg-green-100 text-green-700',  label: '✓ Approvata'  },
+  rifiutata: { cls: 'bg-red-100 text-red-700',      label: '✕ Rifiutata'  },
 };
 
 export default function Spese() {
@@ -304,9 +304,14 @@ export default function Spese() {
                   <td className="px-4 py-3 text-slate-500">{s.data}</td>
                   <td className="px-4 py-3 text-slate-500">{s.categoria}</td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[s.stato] || 'bg-slate-100 text-slate-500'}`}>
-                      {s.stato}
-                    </span>
+                    <div className="space-y-1">
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${(STATUS_STYLES[s.stato] || STATUS_STYLES.inviata).cls}`}>
+                        {(STATUS_STYLES[s.stato] || STATUS_STYLES.inviata).label}
+                      </span>
+                      {s.stato === 'rifiutata' && s.notaAdmin && (
+                        <p className="text-[11px] text-red-500 italic pl-1">{s.notaAdmin}</p>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right font-bold text-slate-800">€ {(s.importo || 0).toFixed(2)}</td>
                   <td className="px-4 py-3">

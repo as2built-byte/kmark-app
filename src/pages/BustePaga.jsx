@@ -9,7 +9,7 @@ import {
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from 'firebase/storage';
 import {
   ChevronLeft, ChevronRight, Upload, X, Check,
-  Loader2, Trash2, ExternalLink, Search, CheckSquare, Square
+  Loader2, Trash2, ExternalLink, Search, CheckSquare, Square, Users
 } from 'lucide-react';
 import { format } from 'date-fns';
 
@@ -343,6 +343,63 @@ export default function BustePaga() {
           </tbody>
         </table>
       </div>
+
+      {/*  Admin: per-employee payslip overview  */}
+      {isAdmin && !tuttAnno && (
+        <div className="mt-5 rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(145deg,#0f0f0f,#131313)', border: '1px solid rgba(184,150,46,0.2)' }}>
+          <div className="flex items-center justify-between px-4 py-3" style={{ borderBottom: '1px solid rgba(184,150,46,0.1)' }}>
+            <div className="flex items-center gap-2">
+              <Users size={15} style={{ color: '#b8962e' }} />
+              <span className="text-sm font-bold" style={{ color: '#b8962e' }}>
+                Dipendenti — {MESI[meseAttivo]?.label} {anno}
+              </span>
+            </div>
+            <span className="text-xs" style={{ color: 'rgba(240,236,224,0.35)' }}>
+              {dipendenti.filter(d => bustePaga.some(b => b.emailDipendente === d.email && b.mese === meseAttivo)).length} / {dipendenti.length} buste caricate
+            </span>
+          </div>
+          <div className="divide-y" style={{ divideColor: 'rgba(184,150,46,0.06)' }}>
+            {dipendenti.filter(d => d.email).map(d => {
+              const hasBusta = bustePaga.some(b => b.emailDipendente === d.email && b.mese === meseAttivo);
+              const buste    = bustePaga.filter(b => b.emailDipendente === d.email && b.mese === meseAttivo);
+              return (
+                <div key={d.id} className="flex items-center gap-3 px-4 py-2.5" style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <div
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                    style={{ background: hasBusta ? 'rgba(39,174,96,0.15)' : 'rgba(184,150,46,0.1)', color: hasBusta ? '#27ae60' : '#b8962e' }}
+                  >
+                    {d.displayName?.[0]?.toUpperCase() || '?'}
+                  </div>
+                  <span className="flex-1 text-sm truncate" style={{ color: hasBusta ? 'rgba(240,236,224,0.75)' : 'rgba(240,236,224,0.5)' }}>
+                    {d.displayName || d.email}
+                  </span>
+                  {hasBusta ? (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold" style={{ color: '#27ae60' }}>
+                        {eur(buste.reduce((s, b) => s + (b.netto || 0), 0))}
+                      </span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full" style={{ background: 'rgba(39,174,96,0.12)', color: '#27ae60' }}>
+                        ✓ Caricata
+                      </span>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setForm(f => ({ ...f, emailDipendente: d.email, nomeDipendente: d.displayName || '', mese: meseAttivo, anno }));
+                        setShowModal(true);
+                      }}
+                      className="flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-bold transition-all"
+                      style={{ background: 'rgba(184,150,46,0.12)', color: '#b8962e', border: '1px solid rgba(184,150,46,0.25)' }}
+                    >
+                      <Upload size={11} /> Carica
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/*  Upload Modal  */}
       {showModal && (
