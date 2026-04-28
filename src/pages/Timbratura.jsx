@@ -3,7 +3,7 @@ import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import {
   collection, addDoc, query, where, orderBy,
-  onSnapshot, Timestamp, limit
+  onSnapshot, Timestamp
 } from "firebase/firestore";
 import {
   Clock, MapPin, Loader2, CheckCircle2, LogIn, LogOut,
@@ -29,6 +29,7 @@ export default function Timbratura() {
   const [cantieri, setCantieri]       = useState([]);
   const [showPanel, setShowPanel]     = useState(false);
   const [siteSearch, setSiteSearch]   = useState("");
+  const [listenerErr, setListenerErr] = useState("");
 
   /* Live clock */
   useEffect(() => {
@@ -45,23 +46,29 @@ export default function Timbratura() {
     );
   }, []);
 
-  /* Firestore listener */
+  /* Firestore listener — no orderBy to avoid composite-index requirement;
+     sort client-side instead so it works immediately on any Firestore project. */
   useEffect(() => {
     if (!user) return;
+    setListenerErr("");
     const q = query(
       collection(db, "timbrature"),
-      where("userId", "==", user.uid),
-      orderBy("createdAt", "desc"),
-      limit(20)
+      where("userId", "==", user.uid)
     );
     return onSnapshot(
       q,
       (snap) => {
-        const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        const rows = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
+          .slice(0, 30);
         setTimbrature(rows);
         setInServizio(rows.length > 0 && rows[0].tipo === "entrata");
       },
-      (err) => console.error('[timbrature] onSnapshot error:', err)
+      (err) => {
+        console.error('[timbrature] onSnapshot error:', err);
+        setListenerErr(err.message);
+      }
     );
   }, [user]);
 
@@ -431,7 +438,15 @@ export default function Timbratura() {
           <span className="ml-auto text-xs text-slate-400">{timbrature.length} record</span>
         </div>
 
-        {timbrature.length === 0 ? (
+        {listenerErr ? (
+          <div className="flex items-start gap-2 mx-4 my-4 bg-red-50 border border-red-200 rounded-xl px-4 py-3">
+            <AlertCircle size={15} className="text-red-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-red-700 text-xs font-semibold">Errore caricamento timbrature</p>
+              <p className="text-red-500 text-[11px] mt-0.5 font-mono break-all">{listenerErr}</p>
+            </div>
+          </div>
+        ) : timbrature.length === 0 ? (
           <div className="text-center py-12">
             <Clock size={36} className="text-slate-200 mx-auto mb-2" />
             <p className="text-slate-400 text-sm">Nessuna timbratura registrata</p>
