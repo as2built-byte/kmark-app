@@ -46,6 +46,10 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api\//],
+        /* Exclude all Firebase/Google API URLs from service-worker interception.
+           Firebase SDK manages its own connection, caching and retries internally.
+           Letting Workbox intercept Firestore streaming calls breaks onSnapshot. */
+        navigateFallbackAllowlist: [/^(?!.*googleapis\.com).*$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -57,9 +61,13 @@ export default defineConfig({
             },
           },
           {
-            urlPattern: /^https:\/\/firestore\.googleapis\.com\/.*/i,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'firestore-cache' },
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
         ],
       },
