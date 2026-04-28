@@ -40,7 +40,8 @@ export default function Timbratura() {
   useEffect(() => {
     return onSnapshot(
       query(collection(db, 'cantieri'), orderBy('nome')),
-      snap => setCantieri(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+      snap => setCantieri(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      err => console.error('[cantieri] onSnapshot error:', err)
     );
   }, []);
 
@@ -53,11 +54,15 @@ export default function Timbratura() {
       orderBy("createdAt", "desc"),
       limit(20)
     );
-    return onSnapshot(q, (snap) => {
-      const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-      setTimbrature(rows);
-      setInServizio(rows.length > 0 && rows[0].tipo === "entrata");
-    });
+    return onSnapshot(
+      q,
+      (snap) => {
+        const rows = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        setTimbrature(rows);
+        setInServizio(rows.length > 0 && rows[0].tipo === "entrata");
+      },
+      (err) => console.error('[timbrature] onSnapshot error:', err)
+    );
   }, [user]);
 
   /* Fetch address from Nominatim — returns the string AND updates state */

@@ -1,0 +1,61 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "timbrature",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "timbrature",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "email",     "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "spese",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "presenze",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING"  },
+        { "fieldPath": "data",      "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "documenti",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId",    "order": "ASCENDING"  },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "bustePaga",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "emailDipendente", "order": "ASCENDING"  },
+        { "fieldPath": "anno",            "order": "DESCENDING" },
+        { "fieldPath": "mese",            "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "cantieri",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "nome",      "order": "ASCENDING"  }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
