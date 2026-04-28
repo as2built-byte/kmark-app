@@ -7,10 +7,34 @@ import {
 } from "firebase/firestore";
 import {
   Clock, MapPin, Loader2, CheckCircle2, LogIn, LogOut,
-  Navigation, AlertCircle, RefreshCw, Wifi
+  Navigation, AlertCircle, RefreshCw, Building2, ChevronDown
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
+
+const LUOGHI = [
+  "Ufficio / Sede",
+  "ALTOPASCIO",
+  "AMA",
+  "AMA - Calderon de la Barca",
+  "AMA - Campo Boario",
+  "AMA - Isola Ecologica Acilia",
+  "AMA - Maccarese",
+  "AMA - Maresciallo Giardino",
+  "AMA - Ostia Isola Ecologica",
+  "AMA - PIAZZALE DEL VERANO",
+  "AMA - Rocca Cencia",
+  "AMA - Saxa Rubra",
+  "AMA - Settebagni",
+  "AMA - Trigoria",
+  "AMA - Via Laurentina",
+  "Cantiere Roma Nord",
+  "Cantiere Roma Sud",
+  "Cantiere Roma Est",
+  "Cantiere Roma Ovest",
+  "Trasferta",
+  "Smart Working",
+];
 
 export default function Timbratura() {
   const { user } = useAuth();
@@ -24,6 +48,8 @@ export default function Timbratura() {
   const [success, setSuccess]         = useState("");
   const [timbrature, setTimbrature]   = useState([]);
   const [inServizio, setInServizio]   = useState(false);
+  const [luogo, setLuogo]             = useState("");
+  const [luogoError, setLuogoError]   = useState("");
 
   /* Live clock */
   useEffect(() => {
@@ -90,6 +116,8 @@ export default function Timbratura() {
 
   /* Stamp */
   const handleStamp = async (tipo) => {
+    if (!luogo) { setLuogoError("Seleziona il luogo prima di timbrare."); return; }
+    setLuogoError("");
     if (!location) { setLocError("Posizione GPS non disponibile. Clicca il tasto aggiorna."); return; }
     setStamping(tipo);
     try {
@@ -99,6 +127,7 @@ export default function Timbratura() {
         userId:   user.uid,
         email:    user.email,
         tipo,
+        luogo,
         lat:      location.latitude,
         lng:      location.longitude,
         accuracy: location.accuracy,
@@ -172,6 +201,34 @@ export default function Timbratura() {
 
       {/* Action buttons */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+        <p className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold mb-3">Luogo / Cantiere</p>
+
+        {/* Site selector */}
+        <div className="relative mb-4">
+          <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <select
+            value={luogo}
+            onChange={e => { setLuogo(e.target.value); setLuogoError(""); }}
+            className={`w-full pl-9 pr-8 py-3 text-sm rounded-xl border appearance-none focus:outline-none transition ${
+              luogoError
+                ? "border-red-400 bg-red-50 text-red-700"
+                : luogo
+                ? "border-emerald-400 bg-emerald-50 text-slate-800"
+                : "border-slate-200 bg-white text-slate-500"
+            }`}
+          >
+            <option value="">— Seleziona luogo —</option>
+            {LUOGHI.map(l => <option key={l} value={l}>{l}</option>)}
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        </div>
+
+        {luogoError && (
+          <div className="flex items-center gap-2 mb-3 text-orange-600 text-xs bg-orange-50 rounded-xl px-3 py-2 border border-orange-100">
+            <AlertCircle size={13} className="flex-shrink-0" /> {luogoError}
+          </div>
+        )}
+
         <p className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold mb-4">Timbra</p>
         <div className="grid grid-cols-2 gap-4">
 
@@ -311,7 +368,8 @@ export default function Timbratura() {
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Data</th>
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Ora</th>
                 <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Tipo</th>
-                <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Posizione</th>
+                <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Luogo</th>
+                <th className="text-left px-4 py-2.5 text-[11px] font-semibold text-slate-500 uppercase tracking-wide hidden sm:table-cell">Posizione GPS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -339,8 +397,18 @@ export default function Timbratura() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs">
+                      {t.luogo ? (
+                        <span className="inline-flex items-center gap-1.5 text-[11px] px-2.5 py-1 rounded-full font-semibold bg-slate-100 text-slate-700">
+                          <Building2 size={10} />
+                          {t.luogo}
+                        </span>
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs hidden sm:table-cell">
                       {shortAddr ? (
-                        <span className="text-slate-500 truncate max-w-[180px] block">{shortAddr}</span>
+                        <span className="text-slate-400 truncate max-w-[160px] block">{shortAddr}</span>
                       ) : t.lat ? (
                         <a
                           href={`https://www.google.com/maps?q=${t.lat},${t.lng}`}
@@ -350,7 +418,7 @@ export default function Timbratura() {
                           {t.lat.toFixed(4)}, {t.lng.toFixed(4)}
                         </a>
                       ) : (
-                        <span className="text-slate-300"></span>
+                        <span className="text-slate-300">—</span>
                       )}
                     </td>
                   </tr>

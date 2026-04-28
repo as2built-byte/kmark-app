@@ -280,6 +280,7 @@ export default function TimbratureAdmin() {
                   <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Stato</th>
                   <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Ore mese</th>
                   <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Ultima timbratura</th>
+                  <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Luogo</th>
                   <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wide">Posizione</th>
                 </tr>
               </thead>
@@ -362,6 +363,17 @@ export default function TimbratureAdmin() {
                         )}
                       </td>
 
+                      {/* Luogo */}
+                      <td className="px-4 py-3">
+                        {emp.latest?.luogo ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold bg-slate-100 text-slate-700">
+                            {emp.latest.luogo}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 text-xs">—</span>
+                        )}
+                      </td>
+
                       {/* Posizione */}
                       <td className="px-4 py-3">
                         {emp.latest?.lat ? (
@@ -438,6 +450,13 @@ export default function TimbratureAdmin() {
                     {selected.fuoriSede
                       ? `Fuori sede: ${Math.round(selected.distSede)}m dalla sede`
                       : `In sede: ${Math.round(selected.distSede)}m dalla sede`}
+                  </div>
+                )}
+
+                {selected.latest?.luogo && (
+                  <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">Luogo:</span>
+                    <span className="text-xs font-bold text-slate-700">{selected.latest.luogo}</span>
                   </div>
                 )}
 
