@@ -37,11 +37,15 @@ export default function Timbratura() {
     return () => clearInterval(t);
   }, []);
 
-  /* Load cantieri from Firestore */
+  /* Load cantieri from Firestore — sort client-side to avoid index requirements */
   useEffect(() => {
     return onSnapshot(
-      query(collection(db, 'cantieri'), orderBy('nome')),
-      snap => setCantieri(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+      query(collection(db, 'cantieri')),
+      snap => {
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        list.sort((a, b) => (a.nome || '').localeCompare(b.nome || '', 'it'));
+        setCantieri(list);
+      },
       err => console.error('[cantieri] onSnapshot error:', err)
     );
   }, []);
