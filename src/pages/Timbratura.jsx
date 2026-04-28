@@ -7,34 +7,10 @@ import {
 } from "firebase/firestore";
 import {
   Clock, MapPin, Loader2, CheckCircle2, LogIn, LogOut,
-  Navigation, AlertCircle, RefreshCw, Building2, ChevronDown
+  Navigation, AlertCircle, RefreshCw, Building2, ChevronDown, Search
 } from "lucide-react";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-
-const LUOGHI = [
-  "Ufficio / Sede",
-  "ALTOPASCIO",
-  "AMA",
-  "AMA - Calderon de la Barca",
-  "AMA - Campo Boario",
-  "AMA - Isola Ecologica Acilia",
-  "AMA - Maccarese",
-  "AMA - Maresciallo Giardino",
-  "AMA - Ostia Isola Ecologica",
-  "AMA - PIAZZALE DEL VERANO",
-  "AMA - Rocca Cencia",
-  "AMA - Saxa Rubra",
-  "AMA - Settebagni",
-  "AMA - Trigoria",
-  "AMA - Via Laurentina",
-  "Cantiere Roma Nord",
-  "Cantiere Roma Sud",
-  "Cantiere Roma Est",
-  "Cantiere Roma Ovest",
-  "Trasferta",
-  "Smart Working",
-];
 
 export default function Timbratura() {
   const { user } = useAuth();
@@ -48,13 +24,24 @@ export default function Timbratura() {
   const [success, setSuccess]         = useState("");
   const [timbrature, setTimbrature]   = useState([]);
   const [inServizio, setInServizio]   = useState(false);
-  const [luogo, setLuogo]             = useState("");
+  const [luogoObj, setLuogoObj]       = useState(null);
   const [luogoError, setLuogoError]   = useState("");
+  const [cantieri, setCantieri]       = useState([]);
+  const [showPanel, setShowPanel]     = useState(false);
+  const [siteSearch, setSiteSearch]   = useState("");
 
   /* Live clock */
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
+  }, []);
+
+  /* Load cantieri from Firestore */
+  useEffect(() => {
+    return onSnapshot(
+      query(collection(db, 'cantieri'), orderBy('nome')),
+      snap => setCantieri(snap.docs.map(d => ({ id: d.id, ...d.data() })))
+    );
   }, []);
 
   /* Firestore listener */
@@ -114,9 +101,14 @@ export default function Timbratura() {
 
   useEffect(() => { getLocation(); }, []);
 
+  const filteredCantieri = cantieri.filter(c =>
+    c.nome.toLowerCase().includes(siteSearch.toLowerCase()) ||
+    (c.indirizzo || '').toLowerCase().includes(siteSearch.toLowerCase())
+  );
+
   /* Stamp */
   const handleStamp = async (tipo) => {
-    if (!luogo) { setLuogoError("Seleziona il luogo prima di timbrare."); return; }
+    if (!luogoObj) { setLuogoError("Seleziona il luogo prima di timbrare."); return; }
     setLuogoError("");
     if (!location) { setLocError("Posizione GPS non disponibile. Clicca il tasto aggiorna."); return; }
     setStamping(tipo);
@@ -124,15 +116,16 @@ export default function Timbratura() {
       /* Guarantee address is resolved before saving — fetch if not yet available */
       const finalAddress = address || await fetchAddress(location.latitude, location.longitude);
       await addDoc(collection(db, "timbrature"), {
-        userId:   user.uid,
-        email:    user.email,
+        userId:          user.uid,
+        email:           user.email,
         tipo,
-        luogo,
-        lat:      location.latitude,
-        lng:      location.longitude,
-        accuracy: location.accuracy,
-        address:  finalAddress || null,
-        createdAt: Timestamp.now(),
+        luogo:           luogoObj.nome,
+        luogoIndirizzo:  luogoObj.indirizzo || null,
+        lat:             location.latitude,
+        lng:             location.longitude,
+        accuracy:        location.accuracy,
+        address:         finalAddress || null,
+        createdAt:       Timestamp.now(),
       });
       setSuccess(tipo === "entrata" ? "Entrata registrata con successo!" : "Uscita registrata con successo!");
       setTimeout(() => setSuccess(""), 4000);
@@ -203,24 +196,101 @@ export default function Timbratura() {
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
         <p className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold mb-3">Luogo / Cantiere</p>
 
-        {/* Site selector */}
+        {/* Custom site picker */}
         <div className="relative mb-4">
-          <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-          <select
-            value={luogo}
-            onChange={e => { setLuogo(e.target.value); setLuogoError(""); }}
-            className={`w-full pl-9 pr-8 py-3 text-sm rounded-xl border appearance-none focus:outline-none transition ${
+          <button
+            type="button"
+            onClick={() => { setShowPanel(!showPanel); setSiteSearch(""); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl border text-left transition ${
               luogoError
-                ? "border-red-400 bg-red-50 text-red-700"
-                : luogo
-                ? "border-emerald-400 bg-emerald-50 text-slate-800"
-                : "border-slate-200 bg-white text-slate-500"
+                ? "border-red-400 bg-red-50"
+                : luogoObj
+                ? "border-emerald-400 bg-emerald-50"
+                : "border-slate-200 bg-slate-50"
             }`}
           >
-            <option value="">— Seleziona luogo —</option>
-            {LUOGHI.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
-          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Building2 size={15} className={luogoObj ? "text-emerald-600" : "text-slate-400"} />
+            <div className="flex-1 min-w-0">
+              {luogoObj ? (
+                <>
+                  <p className="font-semibold text-slate-800 text-sm leading-tight">{luogoObj.nome}</p>
+                  {luogoObj.indirizzo && (
+                    <p className="text-xs text-slate-400 truncate mt-0.5">{luogoObj.indirizzo}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-slate-400">— Seleziona luogo —</p>
+              )}
+            </div>
+            <ChevronDown size={14} className={`text-slate-400 flex-shrink-0 transition-transform ${showPanel ? "rotate-180" : ""}`} />
+          </button>
+
+          {showPanel && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => { setShowPanel(false); setSiteSearch(""); }}
+              />
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                {/* Search */}
+                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-slate-100">
+                  <Search size={13} className="text-slate-400 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Cerca cantiere o indirizzo..."
+                    value={siteSearch}
+                    onChange={e => setSiteSearch(e.target.value)}
+                    autoFocus
+                    className="flex-1 text-sm focus:outline-none placeholder-slate-400 text-slate-800 bg-transparent"
+                  />
+                  {siteSearch && (
+                    <button onClick={() => setSiteSearch("")} className="text-slate-300 hover:text-slate-500">
+                      <X size={12} />
+                    </button>
+                  )}
+                </div>
+                {/* Items */}
+                <div className="max-h-64 overflow-y-auto">
+                  {filteredCantieri.length === 0 ? (
+                    <p className="text-center py-6 text-slate-400 text-sm">Nessun risultato</p>
+                  ) : filteredCantieri.map(c => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => {
+                        setLuogoObj(c);
+                        setShowPanel(false);
+                        setSiteSearch("");
+                        setLuogoError("");
+                      }}
+                      className={`w-full flex items-start gap-3 px-4 py-3 text-left hover:bg-slate-50 transition border-b border-slate-50 ${
+                        luogoObj?.id === c.id ? "bg-emerald-50" : ""
+                      }`}
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        luogoObj?.id === c.id ? "bg-emerald-100" : "bg-slate-100"
+                      }`}>
+                        <Building2 size={13} className={luogoObj?.id === c.id ? "text-emerald-600" : "text-slate-400"} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-semibold ${
+                          luogoObj?.id === c.id ? "text-emerald-700" : "text-slate-800"
+                        }`}>{c.nome}</p>
+                        {c.indirizzo ? (
+                          <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                            <MapPin size={10} className="flex-shrink-0" />{c.indirizzo}
+                          </p>
+                        ) : null}
+                      </div>
+                      {luogoObj?.id === c.id && (
+                        <CheckCircle2 size={15} className="text-emerald-500 flex-shrink-0 mt-1" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {luogoError && (

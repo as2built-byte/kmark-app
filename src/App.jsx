@@ -7,6 +7,7 @@ import Dipendenti from './pages/Dipendenti';
 import TimbratureAdmin from './pages/TimbratureAdmin';
 import AdminPresenze from './pages/AdminPresenze';
 import AdminSpese from './pages/AdminSpese';
+import AdminCantieri from './pages/AdminCantieri';
 import BustePaga from './pages/BustePaga';
 import Spese from './pages/Spese';
 import Presenze from './pages/Presenze';
@@ -43,6 +44,7 @@ function App() {
           <Route path="timbrature-admin" element={<AdminRoute><TimbratureAdmin /></AdminRoute>} />
           <Route path="presenze-admin" element={<AdminRoute><AdminPresenze /></AdminRoute>} />
           <Route path="spese-admin" element={<AdminRoute><AdminSpese /></AdminRoute>} />
+          <Route path="cantieri-admin" element={<AdminRoute><AdminCantieri /></AdminRoute>} />
           <Route path="buste-paga" element={<BustePaga />} />
           <Route path="spese" element={<Spese />} />
           <Route path="presenze" element={<Presenze />} />

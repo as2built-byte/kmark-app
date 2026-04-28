@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   ClipboardCheck,
   ReceiptText,
+  MapPin,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -24,6 +25,7 @@ export const navItems = [
   { to: '/timbrature-admin', icon: ShieldCheck,    label: 'Timbrature',      admin: true },
   { to: '/presenze-admin',   icon: ClipboardCheck, label: 'Presenze',        admin: true },
   { to: '/spese-admin',      icon: ReceiptText,    label: 'Spese',           admin: true },
+  { to: '/cantieri-admin',   icon: MapPin,         label: 'Cantieri',        admin: true },
 ];
 
 export default function Sidebar() {
