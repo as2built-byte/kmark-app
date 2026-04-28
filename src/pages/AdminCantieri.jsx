@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import {
   collection, addDoc, onSnapshot, deleteDoc,
   doc, updateDoc, orderBy, query, writeBatch
 } from 'firebase/firestore';
-import { Building2, Plus, X, Edit2, Check, Trash2, Loader2, MapPin, Download } from 'lucide-react';
+import { Building2, Plus, X, Edit2, Check, Trash2, Loader2, MapPin, Download, Search } from 'lucide-react';
 
 const PREDEFINED = [
   { nome: 'Ufficio / Sede',               indirizzo: '' },
@@ -35,9 +35,14 @@ export default function AdminCantieri() {
   const [showForm, setShowForm]   = useState(false);
   const [editId, setEditId]       = useState(null);
   const [form, setForm]           = useState({ nome: '', indirizzo: '' });
-  const [loading, setLoading]     = useState(false);
-  const [seeding, setSeeding]     = useState(false);
-  const [error, setError]         = useState('');
+  const [loading, setLoading]         = useState(false);
+  const [seeding, setSeeding]         = useState(false);
+  const [error, setError]             = useState('');
+  const [addrSuggestions, setAddrSuggestions] = useState([]);
+  const [addrLoading, setAddrLoading] = useState(false);
+  const [showAddrPanel, setShowAddrPanel] = useState(false);
+  const addrDebounce = useRef(null);
+  const addrRef = useRef(null);
 
   useEffect(() => {
     return onSnapshot(
@@ -46,7 +51,38 @@ export default function AdminCantieri() {
     );
   }, []);
 
-  const resetForm = () => { setForm({ nome: '', indirizzo: '' }); setEditId(null); setError(''); };
+  const resetForm = () => {
+    setForm({ nome: '', indirizzo: '' });
+    setEditId(null);
+    setError('');
+    setAddrSuggestions([]);
+    setShowAddrPanel(false);
+  };
+
+  const handleAddrChange = (val) => {
+    setForm(f => ({ ...f, indirizzo: val }));
+    setShowAddrPanel(true);
+    clearTimeout(addrDebounce.current);
+    if (val.trim().length < 3) { setAddrSuggestions([]); setAddrLoading(false); return; }
+    setAddrLoading(true);
+    addrDebounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&countrycodes=it&limit=6&addressdetails=1`,
+          { headers: { 'Accept-Language': 'it' } }
+        );
+        const data = await res.json();
+        setAddrSuggestions(data.map(d => d.display_name));
+      } catch { setAddrSuggestions([]); }
+      finally { setAddrLoading(false); }
+    }, 350);
+  };
+
+  const pickAddr = (addr) => {
+    setForm(f => ({ ...f, indirizzo: addr }));
+    setAddrSuggestions([]);
+    setShowAddrPanel(false);
+  };
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -146,15 +182,44 @@ export default function AdminCantieri() {
               className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c0392b] focus:ring-1 focus:ring-[#c0392b]"
             />
           </div>
-          <div>
+          <div className="relative">
             <label className="block text-xs font-medium text-slate-500 mb-1">Indirizzo</label>
-            <input
-              type="text"
-              value={form.indirizzo}
-              onChange={e => setForm({ ...form, indirizzo: e.target.value })}
-              placeholder="es. Via Settebagni 400, Roma"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c0392b] focus:ring-1 focus:ring-[#c0392b]"
-            />
+            <div className="relative">
+              <input
+                ref={addrRef}
+                type="text"
+                value={form.indirizzo}
+                onChange={e => handleAddrChange(e.target.value)}
+                onFocus={() => addrSuggestions.length > 0 && setShowAddrPanel(true)}
+                placeholder="es. Via Settebagni 400, Roma"
+                autoComplete="off"
+                className="w-full border border-slate-200 rounded-lg px-3 pr-8 py-2 text-sm focus:outline-none focus:border-[#c0392b] focus:ring-1 focus:ring-[#c0392b]"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                {addrLoading
+                  ? <Loader2 size={13} className="text-slate-400 animate-spin" />
+                  : <Search size={13} className="text-slate-300" />}
+              </div>
+            </div>
+
+            {showAddrPanel && addrSuggestions.length > 0 && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowAddrPanel(false)} />
+                <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-slate-200 rounded-xl shadow-2xl z-50 overflow-hidden max-h-52 overflow-y-auto">
+                  {addrSuggestions.map((s, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => pickAddr(s)}
+                      className="w-full flex items-start gap-2 px-3 py-2.5 text-left hover:bg-slate-50 transition border-b border-slate-50 last:border-0"
+                    >
+                      <MapPin size={12} className="text-[#c0392b] flex-shrink-0 mt-0.5" />
+                      <span className="text-xs text-slate-700 leading-snug">{s}</span>
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
           <button
             type="submit" disabled={loading}
