@@ -3,6 +3,7 @@ import { Menu, X, LogOut } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Sidebar, { navItems } from './Sidebar';
+import LanguageSelector from './LanguageSelector';
 
 export default function Layout() {
   const { user, userRole, logout } = useAuth();
@@ -28,7 +29,8 @@ export default function Layout() {
 
       {/* Mobile header */}
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0a0a0a] text-white shadow" style={{borderBottom:'1px solid rgba(184,150,46,0.18)'}}>
+        {/* Mobile header */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 bg-[#0a0a0a] text-white shadow" style={{borderBottom:'1px solid rgba(184,150,46,0.18)'}}>
           <div className="flex items-center gap-2">
             <img
               src="/logo-kmark.png"
@@ -36,10 +38,13 @@ export default function Layout() {
               className="h-8 w-auto object-contain"
             />
           </div>
-          <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1">
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </header>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <button onClick={() => setMobileOpen(!mobileOpen)} className="p-1">
+              {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
+        </div>
 
         {/* Mobile dropdown menu */}
         {mobileOpen && (

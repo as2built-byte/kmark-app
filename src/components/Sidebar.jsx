@@ -14,6 +14,7 @@ import {
   MapPin,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import LanguageSelector from './LanguageSelector';
 
 export const navItems = [
   { to: '/timbratura',       icon: Clock,        label: 'Timbratura'        },
@@ -122,6 +123,11 @@ export default function Sidebar() {
             <p className="text-[11px] font-semibold truncate" style={{color:'#b8962e'}}>{user?.email?.split('@')[0]}</p>
             <p className="text-[9px] text-white/30 truncate">{user?.email}</p>
           </div>
+        </div>
+
+        {/* Language Selector - Desktop */}
+        <div className="px-1">
+          <LanguageSelector />
         </div>
 
         <button
