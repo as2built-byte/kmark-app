@@ -3,7 +3,7 @@ import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext";
 import {
   collection, addDoc, query, where, orderBy,
-  onSnapshot, Timestamp
+  onSnapshot, Timestamp, getDocs
 } from "firebase/firestore";
 import {
   Clock, MapPin, Loader2, CheckCircle2, LogIn, LogOut,
@@ -49,6 +49,45 @@ export default function Timbratura() {
       err => console.error('[cantieri] onSnapshot error:', err)
     );
   }, []);
+
+  /* One-time fetch to debug — bypass onSnapshot */
+  useEffect(() => {
+    if (!user) return;
+    console.log('[DEBUG-FETCH] Starting one-time fetch...');
+    console.log('[DEBUG-FETCH] user.uid:', user.uid);
+    console.log('[DEBUG-FETCH] user.email:', user.email);
+    
+    const fetchData = async () => {
+      try {
+        // Try by userId (uid)
+        const q1 = query(
+          collection(db, "timbrature"),
+          where("userId", "==", user.uid)
+        );
+        const snap1 = await getDocs(q1);
+        console.log('[DEBUG-FETCH] by userId:', snap1.docs.length, 'docs');
+        
+        // Try by email (fallback in case userId was stored as email)
+        const q2 = query(
+          collection(db, "timbrature"),
+          where("email", "==", user.email)
+        );
+        const snap2 = await getDocs(q2);
+        console.log('[DEBUG-FETCH] by email:', snap2.docs.length, 'docs');
+        
+        // Show first doc from each
+        snap1.docs.slice(0, 2).forEach((d, i) => {
+          console.log(`[DEBUG-FETCH] by uid doc ${i}:`, d.id, d.data());
+        });
+        snap2.docs.slice(0, 2).forEach((d, i) => {
+          console.log(`[DEBUG-FETCH] by email doc ${i}:`, d.id, d.data());
+        });
+      } catch (err) {
+        console.error('[DEBUG-FETCH] Error:', err);
+      }
+    };
+    fetchData();
+  }, [user]);
 
   /* Firestore listener — no orderBy to avoid composite-index requirement;
      sort client-side instead so it works immediately on any Firestore project. */
