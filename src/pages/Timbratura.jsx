@@ -55,17 +55,25 @@ export default function Timbratura() {
   useEffect(() => {
     if (!user) return;
     setListenerErr("");
+    console.log('[DEBUG] user.uid:', user.uid);
+    console.log('[DEBUG] user.email:', user.email);
     const q = query(
       collection(db, "timbrature"),
       where("userId", "==", user.uid)
     );
+    console.log('[DEBUG] Starting onSnapshot listener...');
     return onSnapshot(
       q,
       (snap) => {
+        console.log('[DEBUG] onSnapshot fired! docs count:', snap.docs.length);
+        snap.docs.forEach((d, i) => {
+          console.log(`[DEBUG] doc ${i}:`, d.id, d.data());
+        });
         const rows = snap.docs
           .map((d) => ({ id: d.id, ...d.data() }))
           .sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
           .slice(0, 30);
+        console.log('[DEBUG] rows after sort:', rows.length);
         setTimbrature(rows);
         setInServizio(rows.length > 0 && rows[0].tipo === "entrata");
       },
